@@ -1,3 +1,3 @@
 # DotNet.Extensions
 
-Little extensions and helpers for ASP.NET Core 
+Little extensions and helpers for.NET
