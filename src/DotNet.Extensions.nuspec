@@ -1,0 +1,36 @@
+﻿<?xml version="1.0"?>
+
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>nonconformee.DotNet.Extensions</id>
+    <version>1.2.0.1</version>
+
+    <title>nonconformee.DotNet.Extensions</title>
+    <description>Little extensions and helpers for .NET</description>
+    <readme>doc/README.md</readme>
+    <releaseNotes>doc/CHANGELOG.md</releaseNotes>
+    <authors>nonconformee</authors>
+    <icon>img/ICON.png</icon>
+    <tags>.NET dotnet utilities extensions helpers</tags>
+
+    <projectUrl>https://github.com/RotenInformatik/UtilitiesDotNet</projectUrl>
+    <repository type="git" url="https://github.com/NuGet/NuGet.Client.git"/>
+
+    <license type="expression">MIT</license>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    
+    <developmentDependency>false</developmentDependency>
+    
+  </metadata>
+  <files>
+
+    <file src="bin/release/nonconformee.DotNet.Extensions.dll" target="lib\nonconformee.DotNet.Extensions.dll" />
+    <file src="bin/release/nonconformee.DotNet.Extensions.xml" target="lib\nonconformee.DotNet.Extensions.xml" />
+    <file src="bin/release/nonconformee.DotNet.Extensions.deps.json" target="lib\nonconformee.DotNet.Extensions.deps.json" />
+    
+    <file src="DotNet.Extensions.png" target="img/ICON.png" />
+
+    <file src="../README.md" target="doc/README.md" />
+    <file src="../CHANGELOG.md" target="doc/CHANGELOG.md" />
+  </files>
+</package>
