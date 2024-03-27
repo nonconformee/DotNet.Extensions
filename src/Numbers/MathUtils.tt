@@ -1,0 +1,67 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ output extension=".tt.cs" #>
+
+using System;
+
+// ReSharper disable RedundantCast
+
+namespace RI.Utilities.Numbers
+{
+    /// <summary>
+    /// Provides various mathematical utility methods.
+    /// </summary>
+    /// <threadsafety static="false" instance="false" />
+    public static class MathUtils
+    {
+<#
+string[] types = new string[]				{	"sbyte",	"byte",		"short",	"ushort",	"int",	"uint",		"long",		"ulong",	"float",	"double",	"decimal"	};
+string[] zeros = new string[]				{	"0",		"0",		"0",		"0",		"0",	"0",		"0",		"0ul",		"0.0f",		"0.0",		"0.0m"		};
+bool[] useFloatZeroComparisons = new bool[]	{	false,		false,		false,		false,		false,	false,		false,		false,		true,		true,		false		};
+bool[] isClsCompliant = new bool[]          {	false,		true,		true,		false,		true,	false,		true,		false,		true,		true,		true		};
+for (int i1 = 0; i1 < types.Length; i1++)
+{
+string type = types[i1];
+string zero = zeros[i1];
+string zeroComparison = useFloatZeroComparisons[i1] ? ".AlmostZero()" : (" == " + zero);
+string clsCompliance = isClsCompliant[i1] ? "[CLSCompliant(true)]" : "[CLSCompliant(false)]";
+#>
+
+        /// <summary>
+        /// Finds the greatest common divisor (GCD) of two values.
+        /// </summary>
+        /// <param name="x">The first value.</param>
+        /// <param name="y">The second value.</param>
+        /// <returns>
+        /// The clamped value.
+        /// </returns>
+        <#=clsCompliance#>
+        public static <#=type#> Gcd (<#=type#> x, <#=type#> y)
+        {
+            while (!(y<#=zeroComparison#>))
+            {
+                <#=type#> temp = y;
+                y = (<#=type#>)(x % y);
+                x = temp;
+            }
+            return x;
+        }
+
+        /// <summary>
+        /// Finds the least common multiple (LCM) of two values.
+        /// </summary>
+        /// <param name="x">The first value.</param>
+        /// <param name="y">The second value.</param>
+        /// <returns>
+        /// The clamped value.
+        /// </returns>
+        <#=clsCompliance#>
+        public static <#=type#> Lcm (<#=type#> x, <#=type#> y)
+        {
+            return (<#=type#>)((x / MathUtils.Gcd(x, y)) * y);
+        }
+<#
+}
+#>
+    }
+}

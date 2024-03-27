@@ -1,0 +1,1319 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ output extension=".tt.cs" #>
+
+using System;
+using System.Linq;
+using System.Globalization;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
+// ReSharper disable RedundantCast
+
+namespace RI.Utilities.Numbers
+{
+    /// <summary>
+    ///     Provides utility/extension methods for numerical types.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Numerical types are: <see cref="sbyte"/>, <see cref="byte"/>, <see cref="short"/>, <see cref="ushort"/>, <see cref="int"/>, <see cref="uint"/>, <see cref="long"/>, <see cref="ulong"/>, <see cref="float"/>, <see cref="double"/>, <see cref="decimal"/>.
+    /// </para>
+    /// </remarks>
+    /// <threadsafety static="false" instance="false" />
+    public static class NumberExtensions
+    {
+<#
+string[] types = new string[]		{	"sbyte",	"byte",		"short",	"ushort",	"int",	"uint",		"long",		"ulong",	"float",	"double",	"decimal"	};
+bool[] isClsCompliant = new bool[]  {	false,		true,		true,		false,		true,	false,		true,		false,		true,		true,		true		};
+for (int i1 = 0; i1 < types.Length; i1++)
+{
+string type = types[i1];
+string clsCompliance = isClsCompliant[i1] ? "[CLSCompliant(true)]" : "[CLSCompliant(false)]";
+#>
+
+        /// <summary>
+        /// Clamps a value between an inclusive minimum and maximum value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="min">The lowest possible value.</param>
+        /// <param name="max">The highest possible value.</param>
+        /// <returns>
+        /// The clamped value.
+        /// </returns>
+        <#=clsCompliance#>
+        public static <#=type#> Clamp (this <#=type#> value, <#=type#> min, <#=type#> max)
+        {
+            if(value < min)
+            {
+                return min;
+            }
+            if(value > max)
+            {
+                return max;
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Clamps a value to an inclusive minimum value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="min">The lowest possible value.</param>
+        /// <returns>
+        /// The clamped value.
+        /// </returns>
+        <#=clsCompliance#>
+        public static <#=type#> ClampMin (this <#=type#> value, <#=type#> min)
+        {
+            if(value < min)
+            {
+                return min;
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Clamps a value to an inclusive maximum value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="max">The highest possible value.</param>
+        /// <returns>
+        /// The clamped value.
+        /// </returns>
+        <#=clsCompliance#>
+        public static <#=type#> ClampMax (this <#=type#> value, <#=type#> max)
+        {
+            if(value > max)
+            {
+                return max;
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Quantizes a value to the nearest value of a multiple.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="multiple">The multiple.</param>
+        /// <returns>
+        /// The quantized value.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <see cref="MidpointRounding.ToEven"/> is used for <see cref="MidpointRounding"/>.
+        /// </para>
+        /// </remarks>
+        <#=clsCompliance#>
+        public static <#=type#> Quantize (this <#=type#> value, <#=type#> multiple) => (<#=type#>)(Math.Round((double)value / (double)multiple) * (double)multiple);
+
+        /// <summary>
+        /// Quantizes a value to the nearest value of a multiple.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="multiple">The multiple.</param>
+        /// <param name="rounding">The kind of rounding to use.</param>
+        /// <returns>
+        /// The quantized value.
+        /// </returns>
+        <#=clsCompliance#>
+        public static <#=type#> Quantize (this <#=type#> value, <#=type#> multiple, MidpointRounding rounding) => (<#=type#>)(Math.Round((double)value / (double)multiple, rounding) * (double)multiple);
+
+        /// <summary>
+        /// Finds the greatest common divisor (GCD) of two values.
+        /// </summary>
+        /// <param name="x">The first value.</param>
+        /// <param name="y">The second value.</param>
+        /// <returns>
+        /// The clamped value.
+        /// </returns>
+        <#=clsCompliance#>
+        public static <#=type#> Gcd (this <#=type#> x, <#=type#> y) => MathUtils.Gcd(x, y);
+
+        /// <summary>
+        /// Finds the least common multiple (LCM) of two values.
+        /// </summary>
+        /// <param name="x">The first value.</param>
+        /// <param name="y">The second value.</param>
+        /// <returns>
+        /// The clamped value.
+        /// </returns>
+        <#=clsCompliance#>
+        public static <#=type#> Lcm (this <#=type#> x, <#=type#> y) => MathUtils.Lcm(x, y);
+
+        /// <summary>
+        /// Gets the sum from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The sum of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        <#=clsCompliance#>
+        public static <#=type#> Sum (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> sum = 0;
+            foreach(<#=type#> value in values)
+            {
+                sum += value;
+            }
+            return sum;
+        }
+
+        /// <summary>
+        /// Gets the minimum value from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The minimum value of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        <#=clsCompliance#>
+        public static <#=type#> Min (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> min = <#=type#>.MaxValue;
+            foreach(<#=type#> value in values)
+            {
+                if(value < min)
+                {
+                    min = value;
+                }
+            }
+            return min;
+        }
+
+        /// <summary>
+        /// Gets the maximum value from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The maximum value of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        <#=clsCompliance#>
+        public static <#=type#> Max (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> max = <#=type#>.MinValue;
+            foreach(<#=type#> value in values)
+            {
+                if(value > max)
+                {
+                    max = value;
+                }
+            }
+            return max;
+        }
+
+        /// <summary>
+        /// Finds the greatest common divisor (GCD) of a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The GCD of the sequence or zero if the sequence is empty.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        <#=clsCompliance#>
+        public static <#=type#> Gcd (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> gcd = 0;
+            int index = 0;
+            foreach(<#=type#> value in values)
+            {
+                if(index == 0)
+                {
+                    gcd = value;
+                }
+                else
+                {
+                    gcd = MathUtils.Gcd(gcd, value);
+                }
+                index++;
+            }
+            return gcd;
+        }
+
+        /// <summary>
+        /// Finds the least common multiple (LCM) of a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The LCM of the sequence or zero if the sequence is empty.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        <#=clsCompliance#>
+        public static <#=type#> Lcm (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> lcm = 0;
+            int index = 0;
+            foreach(<#=type#> value in values)
+            {
+                if(index == 0)
+                {
+                    lcm = value;
+                }
+                else
+                {
+                    lcm = MathUtils.Lcm(lcm, value);
+                }
+                index++;
+            }
+            return lcm;
+        }
+<#
+if(type != "float")
+{
+#>
+
+        /// <summary>
+        /// Converts a sequence of values to floats.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The list of values as floats.
+        /// An empty list is returned if the sequence is empty.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        <#=clsCompliance#>
+        public static IEnumerable<float> AsFloat (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            return values.Select(x => (float)x);
+        }
+<#
+}
+if(type != "double")
+{
+#>
+
+        /// <summary>
+        /// Converts a sequence of values to doubles.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The list of values as doubles.
+        /// An empty list is returned if the sequence is empty.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        <#=clsCompliance#>
+        public static IEnumerable<double> AsDouble (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            return values.Select(x => (double)x);
+        }
+
+        /// <summary>
+        /// Gets statistics for a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The statistics for the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        <#=clsCompliance#>
+        public static StatisticValues GetStatistics (this IEnumerable<<#=type#>> values) => new StatisticValues(values.AsDouble());
+<#
+}
+if(type == "double")
+{
+#>
+
+        /// <summary>
+        /// Gets statistics for a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The statistics for the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        <#=clsCompliance#>
+        public static StatisticValues GetStatistics (this IEnumerable<<#=type#>> values) => new StatisticValues(values);
+<#
+}
+if((type != "float") && (type != "double") && (type != "decimal"))
+{
+#>
+
+        /// <summary>
+        /// Gets each digit of a value as separate integers.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The list of digits.
+        /// The most-significant digit comes first, the least-significant digit comes last.
+        /// </returns>
+        <#=clsCompliance#>
+        public static List<int> GetDigits (this <#=type#> value)
+        {
+            string stringValue = value.ToString("D", CultureInfo.InvariantCulture);
+            List<int> digits = new List<int>(20);
+            foreach(char chr in stringValue)
+            {
+                if((chr >= 48) && (chr <= 57))
+                {
+                    digits.Add(chr - 48);
+                }
+            }
+            return digits;
+        }
+<#
+}
+}
+types = new string[]		        {	"sbyte",	"short",	"int",	"long",		"float",	"double",	"decimal"	};
+string[] zeros = new string[]		{	"0",		"0",		"0",	"0",		"0.0f",		"0.0",		"0.0m"		};
+string[] plusOnes = new string[]	{	"1",		"1",		"1",	"1",		"1.0f",		"1.0",		"1.0m"		};
+string[] minusOnes = new string[]	{	"-1",		"-1",		"-1",	"-1",		"-1.0f",	"-1.0",		"-1.0m"		};
+isClsCompliant = new bool[]  {	false,		true,		true,	true,		true,	    true,		true		};
+for (int i1 = 0; i1 < types.Length; i1++)
+{
+string type = types[i1];
+string zero = zeros[i1];
+string plusOne = plusOnes[i1];
+string minusOne = minusOnes[i1];
+string clsCompliance = isClsCompliant[i1] ? "[CLSCompliant(true)]" : "[CLSCompliant(false)]";
+#>
+
+        /// <summary>
+        /// Gets the absolute number of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The absolute number.
+        /// </returns>
+        <#=clsCompliance#>
+        // ReSharper disable once IntVariableOverflowInUncheckedContext
+        public static <#=type#> Abs (this <#=type#> value) => value < <#=zero#> ? (<#=type#>)(<#=minusOne#> * value) : value;
+
+        /// <summary>
+        /// Gets the sign of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// 1 if the number is positive, 0 if the number is zero, -1 if the number is negative.
+        /// </returns>
+        [SuppressMessage("ReSharper", "CompareOfFloatsByEqualityOperator")]
+        <#=clsCompliance#>
+        public static <#=type#> Sign (this <#=type#> value) => (<#=type#>)((value == <#=zero#>) ? <#=zero#> : (value < <#=zero#> ? <#=minusOne#> : <#=plusOne#>));
+
+        /// <summary>
+        /// Calculates the magnitude of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The magnitude.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// The magnitude expresses the order of magnitude of a number.
+        /// Simply said, it calculates the number of significant digits on the left side of the decimal point.
+        /// </para>
+        /// <para>
+        /// If <paramref name="value"/> is positive, the result is positive.
+        /// If <paramref name="value"/> is negative, the result is negative.
+        /// If <paramref name="value"/> is zero, the result is zero.
+        /// </para>
+        /// <para>
+        /// Examples: 0 -> 0; 1 -> 1; -1 -> -1; 5 -> 1; -5 -> -1; 10 -> 2; 100 -> 3; 1234 -> 4; -1234 -> -4; 9999 -> 4; 10000 -> 5; 10001 -> 5
+        /// </para>
+        /// </remarks>
+        [SuppressMessage("ReSharper", "CompareOfFloatsByEqualityOperator")]
+        <#=clsCompliance#>
+        public static <#=type#> Magnitude (this <#=type#> value)
+        {
+            if(value == <#=zero#>)
+            {
+                return <#=zero#>;
+            }
+
+            return (<#=type#>)(Math.Floor(Math.Log10((double)Math.Abs(value)) + 1.0) * (double)Math.Sign(value));
+        }
+<#
+}
+types = new string[]					{	"float",														"double"																};
+plusOnes = new string[]					{	"1.0f",															"1.0"																	};
+string[] plusTwos = new string[]		{	"2.0f",															"2.0"																	};
+string[] accuracies = new string[]		{	"MathConstF.DefaultAccuracy",									"MathConstD.DefaultAccuracy"											};
+string[] toDegFactors = new string[]	{	"MathConstF.RadToDeg",											"MathConstF.RadToDeg"													};
+string[] toRadFactors = new string[]	{	"MathConstF.DegToRad",											"MathConstF.DegToRad"													};
+string[] degCircles = new string[]		{	"360.0f",														"360.0"																	};
+string[] radCircles = new string[]		{	"2.0f*3.1415926535897932384626433832795028841971693993751f",	"2.0*3.1415926535897932384626433832795028841971693993751"				};
+for (int i1 = 0; i1 < types.Length; i1++)
+{
+string type = types[i1];
+string plusOne = plusOnes[i1];
+string plusTwo = plusTwos[i1];
+string accuracy = accuracies[i1];
+string toDegFactor = toDegFactors[i1];
+string toRadFactor = toRadFactors[i1];
+string degCircle = degCircles[i1];
+string radCircle = radCircles[i1];
+#>
+
+        /// <summary>
+        /// Gets the remainder of a division.
+        /// </summary>
+        /// <param name="dividend">The dividend.</param>
+        /// <param name="divisor">The divisor.</param>
+        /// <returns>
+        /// The remainder of  dividend / divisor.
+        /// </returns>
+        /// <remarks>
+        /// <note type="important">
+        /// This is not the same as simply applying the module operator.
+        /// The remainder is calculated, allowing the operation for floating point values.
+        /// </note>
+        /// </remarks>
+        public static <#=type#> DivRem (this <#=type#> dividend, <#=type#> divisor)
+        {
+            <#=type#> dividendAbs = dividend.Abs();
+            <#=type#> divisorAbs = divisor.Abs();
+            <#=type#> sign = dividend.Sign();
+            return (dividendAbs - (divisorAbs * ((<#=type#>)Math.Floor(dividendAbs / divisorAbs)))) * sign;
+        }
+
+        /// <summary>
+        /// Determines whether a value is almost equal to another value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="other">The other value to compare with.</param>
+        /// <returns>
+        /// true if the value is within the default accuracy for equality, false otherwise.
+        /// </returns>
+        public static bool AlmostEqual (this <#=type#> value, <#=type#> other) => value.AlmostEqual(other, <#=accuracy#>);
+
+        /// <summary>
+        /// Determines whether a value is almost equal to another value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="other">The other value to compare with.</param>
+        /// <param name="accuracy">The accuracy within the two values are considered equal.</param>
+        /// <returns>
+        /// true if the value is within the specified accuracy for equality, false otherwise.
+        /// </returns>
+        public static bool AlmostEqual (this <#=type#> value, <#=type#> other, <#=type#> accuracy) => Math.Abs(value - other) < (double)accuracy;
+
+        /// <summary>
+        /// Determines whether a value is almost zero.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// true if the value is within the default accuracy to zero, false otherwise.
+        /// </returns>
+        public static bool AlmostZero (this <#=type#> value) => Math.Abs(value) < (double)<#=accuracy#>;
+
+        /// <summary>
+        /// Determines whether a value is almost zero.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="accuracy">The accuracy within the value is considered zero.</param>
+        /// <returns>
+        /// true if the value is within the specified accuracy to zero, false otherwise.
+        /// </returns>
+        public static bool AlmostZero (this <#=type#> value, <#=type#> accuracy) => Math.Abs(value) < (double)accuracy;
+
+        /// <summary>
+        /// Gets the smallest integer that is greater than or equal to a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The smallest integer.
+        /// </returns>
+        public static <#=type#> Ceiling (this <#=type#> value) => (<#=type#>)Math.Ceiling(value);
+
+        /// <summary>
+        /// Gets the largest integer less than or equal to a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The largest integer.
+        /// </returns>
+        public static <#=type#> Floor (this <#=type#> value) => (<#=type#>)Math.Floor(value);
+
+        /// <summary>
+        /// Gets the integer part of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The integer part.
+        /// </returns>
+        public static <#=type#> Integer (this <#=type#> value) => (<#=type#>)Math.Truncate(value);
+
+        /// <summary>
+        /// Gets the fraction part of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The fraction part.
+        /// </returns>
+        public static <#=type#> Fraction (this <#=type#> value) => (<#=type#>)(value - Math.Truncate(value));
+
+        /// <summary>
+        /// Rounds a value to the nearest integer.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The rounded value.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <see cref="MidpointRounding.ToEven"/> is used for <see cref="MidpointRounding"/>.
+        /// </para>
+        /// </remarks>
+        public static <#=type#> RoundInteger (this <#=type#> value) => (<#=type#>)Math.Round(value);
+
+        /// <summary>
+        /// Rounds a value to the nearest integer.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="rounding">The kind of rounding to use.</param>
+        /// <returns>
+        /// The rounded value.
+        /// </returns>
+        public static <#=type#> RoundInteger (this <#=type#> value, MidpointRounding rounding) => (<#=type#>)Math.Round(value, rounding);
+
+        /// <summary>
+        /// Rounds a value to a specified amount of fractional digits.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="digits">The number of digits.</param>
+        /// <returns>
+        /// The rounded value.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <see cref="MidpointRounding.ToEven"/> is used for <see cref="MidpointRounding"/>.
+        /// </para>
+        /// </remarks>
+        public static <#=type#> RoundDigits (this <#=type#> value, int digits) => (<#=type#>)Math.Round(value, digits);
+
+        /// <summary>
+        /// Rounds a value to a specified amount of fractional digits.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="digits">The number of digits.</param>
+        /// <param name="rounding">The kind of rounding to use.</param>
+        /// <returns>
+        /// The rounded value.
+        /// </returns>
+        public static <#=type#> RoundDigits (this <#=type#> value, int digits, MidpointRounding rounding) => (<#=type#>)Math.Round(value, digits, rounding);
+
+        /// <summary>
+        /// Calculates value^power.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="power">The power.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Pow (this <#=type#> value, double power) => (<#=type#>)Math.Pow((double)value, power);
+
+        /// <summary>
+        /// Calculates value^2.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Pow2 (this <#=type#> value) => value * value;
+
+        /// <summary>
+        /// Calculates value^3.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Pow3 (this <#=type#> value) => value * value * value;
+
+        /// <summary>
+        /// Calculates value^10.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Pow10 (this <#=type#> value) => (<#=type#>)Math.Pow((double)value, 10.0);
+
+        /// <summary>
+        /// Calculates value^e.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> PowE (this <#=type#> value) => (<#=type#>)Math.Pow((double)value, Math.E);
+
+        /// <summary>
+        /// Calculates expBase^value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="expBase">The base.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Exp (this <#=type#> value, double expBase) => (<#=type#>)Math.Pow(expBase, (double)value);
+
+        /// <summary>
+        /// Calculates 2^value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Exp2 (this <#=type#> value) => (<#=type#>)Math.Pow(2.0, (double)value);
+
+        /// <summary>
+        /// Calculates 3^value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Exp3 (this <#=type#> value) => (<#=type#>)Math.Pow(3.0, (double)value);
+
+        /// <summary>
+        /// Calculates 10^value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Exp10 (this <#=type#> value) => (<#=type#>)Math.Pow(10.0, (double)value);
+
+        /// <summary>
+        /// Calculates e^value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> ExpE (this <#=type#> value) => (<#=type#>)Math.Exp((double)value);
+
+        /// <summary>
+        /// Calculates log[logBase](value).
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="logBase">The base.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Log (this <#=type#> value, double logBase) => (<#=type#>)Math.Log((double)value, logBase);
+
+        /// <summary>
+        /// Calculates log[2](value).
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Log2 (this <#=type#> value) => (<#=type#>)Math.Log((double)value, 2.0);
+
+        /// <summary>
+        /// Calculates log[3](value).
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Log3 (this <#=type#> value) => (<#=type#>)Math.Log((double)value, 3.0);
+
+        /// <summary>
+        /// Calculates log[10](value).
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Log10 (this <#=type#> value) => (<#=type#>)Math.Log10((double)value);
+
+        /// <summary>
+        /// Calculates log[e](value).
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> LogE (this <#=type#> value) => (<#=type#>)Math.Log((double)value);
+
+        /// <summary>
+        /// Calculates the square-root of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The square-root.
+        /// </returns>
+        public static <#=type#> Sqrt (this <#=type#> value) => (<#=type#>)Math.Sqrt((double)value);
+
+        /// <summary>
+        /// Calculates the n-th root of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="n">The root.</param>
+        /// <returns>
+        /// The n-th root.
+        /// </returns>
+        public static <#=type#> Root (this <#=type#> value, double n) => (<#=type#>)Math.Pow((double)value, 1.0 / n);
+
+        /// <summary>
+        /// Calculates the Sine of a value in radians.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Sin (this <#=type#> value) => (<#=type#>)Math.Sin(value);
+
+        /// <summary>
+        /// Calculates the Cosine of a value in radians.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Cos (this <#=type#> value) => (<#=type#>)Math.Cos(value);
+
+        /// <summary>
+        /// Calculates the Tangent of a value in radians.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Tan (this <#=type#> value) => (<#=type#>)Math.Tan(value);
+
+        /// <summary>
+        /// Calculates the Cotangent of a value in radians.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Cot (this <#=type#> value) => <#=plusOne#> / (<#=type#>)Math.Tan(value);
+
+        /// <summary>
+        /// Calculates the Arc Sine of a value in radians.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Asin (this <#=type#> value) => (<#=type#>)Math.Asin(value);
+
+        /// <summary>
+        /// Calculates the Arc Cosine of a value in radians.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Acos (this <#=type#> value) => (<#=type#>)Math.Acos(value);
+
+        /// <summary>
+        /// Calculates the Arc Tangent of a value in radians.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Atan (this <#=type#> value) => (<#=type#>)Math.Atan(value);
+
+        /// <summary>
+        /// Calculates the Arc Cotangent of a value in radians.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Acot (this <#=type#> value) => (<#=type#>)Math.Tan(<#=plusOne#> / value);
+
+        /// <summary>
+        /// Calculates the Hyperbolic Sine of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Sinh (this <#=type#> value) => (<#=type#>)Math.Sinh(value);
+
+        /// <summary>
+        /// Calculates the Hyperbolic Cosine of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Cosh (this <#=type#> value) => (<#=type#>)Math.Cosh(value);
+
+        /// <summary>
+        /// Calculates the Hyperbolic Tangent of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Tanh (this <#=type#> value) => (<#=type#>)Math.Tanh(value);
+
+        /// <summary>
+        /// Calculates the Hyperbolic Cotangent of a value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        public static <#=type#> Coth (this <#=type#> value)
+        {
+            double e1 = Math.Exp(value);
+            double e2 = Math.Exp(-value);
+            return (<#=type#>)((e1 + e2) / (e1 - e2));
+        }
+
+        /// <summary>
+        /// Converts a radian value to degrees.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// The result is not clamped to a single full circle value (-359...0...+359).
+        /// Use <see cref="CircularClampDeg(<#=type#>)" /> to clamp to a single full circle value.
+        /// </para>
+        /// </remarks>
+        public static <#=type#> ToDeg (this <#=type#> value) => value * <#=toDegFactor#>;
+
+        /// <summary>
+        /// Converts a degree value to radians.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// The result is not clamped to a single full circle value (-2π...0...+2π).
+        /// Use <see cref="CircularClampRad(<#=type#>)" /> to clamp to a single full circle value.
+        /// </para>
+        /// </remarks>
+        public static <#=type#> ToRad (this <#=type#> value) => value * <#=toRadFactor#>;
+
+        /// <summary>
+        /// Clamps a degree value to a single full circle (-359...0...+359).
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// Examples: 0 -> 0; 350 -> 350; 360 -> 0; 370 -> 10; etc.
+        /// </para>
+        /// </remarks>
+        public static <#=type#> CircularClampDeg (this <#=type#> value) => value.DivRem(<#=degCircle#>);
+
+        /// <summary>
+        /// Clamps a radian value to a single full circle (-2π...0...+2π).
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// Examples: 0 -> 0; 1.5 -> 1.5; 2π -> 0; 3π -> π; etc.
+        /// </para>
+        /// </remarks>
+        public static <#=type#> CircularClampRad (this <#=type#> value) => value.DivRem(<#=radCircle#>);
+
+        /// <summary>
+        /// Gets the fractional part of a value as an integer value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// Examples: 12.34 -> 34; 3.416 -> 416; etc.
+        /// </para>
+        /// </remarks>
+        public static <#=type#> GetFractionAsInteger (this <#=type#> value)
+        {
+            string stringValue = value.ToString("F", CultureInfo.InvariantCulture);
+
+            int separatorIndex = stringValue.IndexOf('.');
+            if(separatorIndex == -1)
+            {
+                return 0;
+            }
+
+            string fractionPart = stringValue.Substring(separatorIndex + 1);
+            return <#=type#>.Parse(fractionPart, CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Gets the Product from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The product of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        public static <#=type#> Product (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> product = 0;
+            foreach(<#=type#> value in values)
+            {
+                product *= value;
+            }
+            return product;
+        }
+
+        /// <summary>
+        /// Gets the arithmetic mean or average from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The arithmetic mean or average of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        public static double ArithmeticMean (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> sum = 0;
+            int count = 0;
+            foreach(<#=type#> value in values)
+            {
+                sum += value;
+                count += 1;
+            }
+            if(count == 0)
+            {
+                return 0;
+            }
+            return sum / (<#=type#>)count;
+        }
+
+        /// <summary>
+        /// Gets the geometric mean from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The geometric mean of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        public static <#=type#> GeometricMean (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> product = 0;
+            int count = 0;
+            foreach(<#=type#> value in values)
+            {
+                product *= value;
+                count += 1;
+            }
+            if(count == 0)
+            {
+                return 0;
+            }
+            return (<#=type#>)Math.Pow((double)product, 1.0 / (<#=type#>)count);
+        }
+
+        /// <summary>
+        /// Gets the harmonic mean from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The harmonic mean of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        public static <#=type#> HarmonicMean (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> sum = 0;
+            int count = 0;
+            foreach(<#=type#> value in values)
+            {
+                sum += (<#=plusOne#>) / value;
+                count += 1;
+            }
+            if(count == 0)
+            {
+                return 0;
+            }
+            return ((<#=type#>)count) / sum;
+        }
+
+        /// <summary>
+        /// Gets the sum of all squared values (first squared, then summed) from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The sum of all squared values of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        public static <#=type#> SquareSum (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> sum = 0;
+            foreach(<#=type#> value in values)
+            {
+                sum += value * value;
+            }
+            return sum;
+        }
+
+        /// <summary>
+        /// Gets the RMS from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The RMS of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        public static <#=type#> Rms (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            <#=type#> squareSum = values.SquareSum();
+            return  (<#=type#>)Math.Sqrt(squareSum);
+        }
+
+        /// <summary>
+        /// Gets the variance from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The variance of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        public static <#=type#> Variance (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            List<<#=type#>> valueList = new List<<#=type#>>(values);
+            if(valueList.Count == 0)
+            {
+                return 0;
+            }
+
+            <#=type#> average = valueList.GeometricMean();
+
+            <#=type#> diff = 0;
+            foreach(<#=type#> value in valueList)
+            {
+                diff += (<#=type#>)Math.Sqrt(value - average);
+            }
+
+            return diff / (<#=type#>)valueList.Count;
+        }
+
+        /// <summary>
+        /// Gets the sigma or standard deviation from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The sigma or standard deviation of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        public static <#=type#> Sigma (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            return (<#=type#>)Math.Sqrt(values.Variance());
+        }
+
+        /// <summary>
+        /// Gets the median from a sequence of values.
+        /// </summary>
+        /// <param name="values">The sequence of values.</param>
+        /// <returns>
+        /// The median of the sequence.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="values" /> is enumerated only once.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"> <paramref name="values" /> is null. </exception>
+        public static <#=type#> Median (this IEnumerable<<#=type#>> values)
+        {
+            if(values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            List<<#=type#>> valueList = new List<<#=type#>>(values);
+            if(valueList.Count == 0)
+            {
+                return 0;
+            }
+
+            if (valueList.Count == 1)
+            {
+                return valueList[0];
+            }
+
+            valueList.Sort();
+
+            if ((valueList.Count % 2) == 0)
+            {
+                return ((valueList[valueList.Count / 2]) + (valueList[(valueList.Count / 2) - 1])) / <#=plusTwo#>;
+            }
+            else
+            {
+                return valueList[valueList.Count / 2];
+            }
+        }
+<#
+}
+#>
+    }
+}
