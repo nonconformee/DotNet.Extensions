@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿
+using System.Collections;
 using System.Globalization;
 using System.Text;
 
@@ -26,7 +27,7 @@ namespace nonconformee.DotNet.Extensions.Text;
 /// <threadsafety static="true" instance="true" />
 public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityComparer<string>, IEqualityComparer
 {
-    #region Static Properties
+    #region Static Fields/Properties
 
     /// <summary>
     ///     Creates a natural alphanumeric comparer for the current thread culture (case matters; strings are not trimmed before comparison; only pure numbers).
@@ -34,7 +35,7 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
     /// <returns>
     ///     The comparer.
     /// </returns>
-    public static AlphanumComparer CurrentCulture => new (CultureInfo.CurrentCulture, AlphanumComparerFlags.PureNumbers);
+    public readonly static AlphanumComparer CurrentCulture = new (CultureInfo.CurrentCulture, AlphanumComparerFlags.PureNumbers);
 
     /// <summary>
     ///     Creates a natural alphanumeric comparer for the current thread culture (case is ignored; strings are not trimmed before comparison; only pure numbers).
@@ -42,7 +43,7 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
     /// <returns>
     ///     The comparer.
     /// </returns>
-    public static AlphanumComparer CurrentCultureIgnoreCase => new (CultureInfo.CurrentCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.IgnoreCase);
+    public readonly static AlphanumComparer CurrentCultureIgnoreCase = new (CultureInfo.CurrentCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.IgnoreCase);
 
     /// <summary>
     ///     Creates a natural alphanumeric comparer for the invariant culture (case matters; strings are not trimmed before comparison; only pure numbers).
@@ -50,7 +51,7 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
     /// <returns>
     ///     The comparer.
     /// </returns>
-    public static AlphanumComparer InvariantCulture => new (CultureInfo.InvariantCulture, AlphanumComparerFlags.PureNumbers);
+    public readonly static AlphanumComparer InvariantCulture = new (CultureInfo.InvariantCulture, AlphanumComparerFlags.PureNumbers);
 
     /// <summary>
     ///     Creates a natural alphanumeric comparer for the invariant culture (case is ignored; strings are not trimmed before comparison; only pure numbers).
@@ -58,7 +59,7 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
     /// <returns>
     ///     The comparer.
     /// </returns>
-    public static AlphanumComparer InvariantCultureIgnoreCase => new (CultureInfo.InvariantCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.IgnoreCase);
+    public readonly static AlphanumComparer InvariantCultureIgnoreCase = new (CultureInfo.InvariantCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.IgnoreCase);
 
     /// <summary>
     ///     Creates a natural alphanumeric comparer for the current thread culture (case matters; strings are trimmed before comparison; only pure numbers).
@@ -66,7 +67,7 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
     /// <returns>
     ///     The comparer.
     /// </returns>
-    public static AlphanumComparer TrimmedCurrentCulture => new (CultureInfo.CurrentCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.Trimmed);
+    public readonly static AlphanumComparer TrimmedCurrentCulture = new (CultureInfo.CurrentCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.Trimmed);
 
     /// <summary>
     ///     Creates a natural alphanumeric comparer for the current thread culture (case is ignored; strings are trimmed before comparison; only pure numbers).
@@ -74,7 +75,7 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
     /// <returns>
     ///     The comparer.
     /// </returns>
-    public static AlphanumComparer TrimmedCurrentCultureIgnoreCase => new (CultureInfo.CurrentCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.Trimmed | AlphanumComparerFlags.IgnoreCase);
+    public readonly static AlphanumComparer TrimmedCurrentCultureIgnoreCase = new (CultureInfo.CurrentCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.Trimmed | AlphanumComparerFlags.IgnoreCase);
 
     /// <summary>
     ///     Creates a natural alphanumeric comparer for the invariant culture (case matters; strings are trimmed before comparison; only pure numbers).
@@ -82,7 +83,7 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
     /// <returns>
     ///     The comparer.
     /// </returns>
-    public static AlphanumComparer TrimmedInvariantCulture => new (CultureInfo.InvariantCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.Trimmed);
+    public readonly static AlphanumComparer TrimmedInvariantCulture = new (CultureInfo.InvariantCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.Trimmed);
 
     /// <summary>
     ///     Creates a natural alphanumeric comparer for the invariant culture (case is ignored; strings are trimmed before comparison; only pure numbers).
@@ -90,46 +91,43 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
     /// <returns>
     ///     The comparer.
     /// </returns>
-    public static AlphanumComparer TrimmedInvariantCultureIgnoreCase => new (CultureInfo.InvariantCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.Trimmed | AlphanumComparerFlags.IgnoreCase);
+    public readonly static AlphanumComparer TrimmedInvariantCultureIgnoreCase = new (CultureInfo.InvariantCulture, AlphanumComparerFlags.PureNumbers | AlphanumComparerFlags.Trimmed | AlphanumComparerFlags.IgnoreCase);
 
     #endregion
 
 
 
 
-    #region Instance Constructor/Destructor
+    #region Instance Constructor/Finalizer
 
     /// <summary>
     ///     Creates a new instance of <see cref="AlphanumComparer" />.
     /// </summary>
     /// <param name="culture"> The used culture. </param>
     /// <param name="options"> The used comparison options. </param>
-    /// <exception cref="ArgumentNullException"> <paramref name="culture" /> is null. </exception>
     public AlphanumComparer (CultureInfo culture, AlphanumComparerFlags options)
     {
         Culture = culture;
         Options = options;
 
-        NumberCharacters = new HashSet<string>(StringComparer.Ordinal);
-
         if ((options & AlphanumComparerFlags.NumberDecimalSeparator) == AlphanumComparerFlags.NumberDecimalSeparator)
         {
-            NumberCharacters.Add(Culture.NumberFormat.NumberDecimalSeparator);
+            _numberCharacters.Add(Culture.NumberFormat.NumberDecimalSeparator);
         }
 
         if ((options & AlphanumComparerFlags.PositiveSign) == AlphanumComparerFlags.PositiveSign)
         {
-            NumberCharacters.Add(Culture.NumberFormat.PositiveSign);
+            _numberCharacters.Add(Culture.NumberFormat.PositiveSign);
         }
 
         if ((options & AlphanumComparerFlags.NegativeSign) == AlphanumComparerFlags.NegativeSign)
         {
-            NumberCharacters.Add(Culture.NumberFormat.NegativeSign);
+            _numberCharacters.Add(Culture.NumberFormat.NegativeSign);
         }
 
         if ((options & AlphanumComparerFlags.NumberGroupSeparator) == AlphanumComparerFlags.NumberGroupSeparator)
         {
-            NumberCharacters.Add(Culture.NumberFormat.NumberGroupSeparator);
+            _numberCharacters.Add(Culture.NumberFormat.NumberGroupSeparator);
         }
     }
 
@@ -138,7 +136,9 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
 
 
 
-    #region Instance Properties/Indexer
+    #region Instance Fields/Properties/Indexer
+
+    private readonly HashSet<string> _numberCharacters = new HashSet<string>(StringComparer.Ordinal);
 
     /// <summary>
     ///     Gets the used culture.
@@ -172,8 +172,6 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
     /// </value>
     public AlphanumComparerFlags Options { get; }
 
-    private HashSet<string> NumberCharacters { get; }
-
     #endregion
 
 
@@ -200,7 +198,7 @@ public sealed class AlphanumComparer : IComparer<string>, IComparer, IEqualityCo
 
     private bool IsDigit (char chr)
     {
-        return char.IsDigit(chr) || NumberCharacters.Contains(new string(chr, 1));
+        return char.IsDigit(chr) || _numberCharacters.Contains(new string(chr, 1));
     }
 
     private int ReadWhileSameType (string str, int startIndex, StringBuilder sb)

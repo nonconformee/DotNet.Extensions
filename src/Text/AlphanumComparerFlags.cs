@@ -1,4 +1,5 @@
-﻿namespace nonconformee.DotNet.Extensions.Text;
+﻿
+namespace nonconformee.DotNet.Extensions.Text;
 
 
 
